@@ -126,6 +126,58 @@ class Dataset:
         }
         return pd.DataFrame.from_dict(data, orient="index", columns=self.features)
 
+    # TODO FAZER TESTES PARA A FUNÇÃO DROPNA
+    def dropna(self) -> 'pd.DataFrame':
+
+        """
+        Returns a modified Dataset object with NaN values dropped
+        Returns
+        -------
+        pandas.DataFrame
+        """
+
+        new_X, new_y = self.X.to_numpy(), self.y.to_numpy()
+
+        mask = ~np.any(np.isnan(new_X), axis = 1) & ~np.any(np.isnan(new_y), axis = 1)
+
+        new_X = new_X[mask]
+        new_y = new_y[mask]
+
+        new_df_X = pd.DataFrame(new_X, columns = self.features)
+        new_df_y = pd.DataFrame(new_y, columns = self.labels)
+
+        new_df = pd.concat([new_df_X, new_df_y], axis=1)
+
+        return new_df
+
+    def fillna(self, value) -> 'Modified Dataset object':
+        """
+        Replaces all null values with another value or the mean/median
+
+        Parameters
+        ----------
+        value: float, or "mean" or "median"
+            The value to replace null values
+
+        Returns
+        ----------
+        Modified Dataset object
+        """
+
+        if value == 'mean':
+            value = self.get_mean()
+        elif value == 'median':
+            value = self.get_median()
+        else:
+            pass
+
+        mask = np.isnan(self.X)
+
+        self.X = np.where(mask == True, value, self.X)
+
+        return self.X
+
+
     @classmethod
     def from_dataframe(cls, df: pd.DataFrame, label: str = None):
         """
