@@ -126,11 +126,12 @@ class Dataset:
         }
         return pd.DataFrame.from_dict(data, orient="index", columns=self.features)
 
-    # TODO FAZER TESTES PARA A FUNÇÃO DROPNA
+    # TODO FAZER TESTES PARA AS 3 FUNÇÕES
     def dropna(self) -> 'pd.DataFrame':
 
         """
         Returns a modified Dataset object with NaN values dropped
+
         Returns
         -------
         pandas.DataFrame
@@ -176,6 +177,32 @@ class Dataset:
         self.X = np.where(mask == True, value, self.X)
 
         return self.X
+
+
+    def remove_by_index(self, index) -> 'Modified Dataset object':
+        """
+        Removes a sample by its index
+
+        Parameters
+        ----------
+        index:  int
+            The index to remove
+
+        Returns
+        ----------
+        Modified Dataset object
+        """
+
+        if index < 0 or index >= len(self.y):
+            raise ValueError("Index out of range")
+
+        mask = np.ones(len(self.y), dtype = bool)
+        mask[index] = False
+
+        self.X = self.X[mask]
+        self.y = self.y[mask]
+
+        return self
 
 
     @classmethod
