@@ -2,53 +2,70 @@ import numpy as np
 
 from si.base.transformer import Transformer
 from si.data.dataset import Dataset
+from si.statistics.f_classification import f_classification
 
 class SelectPercentile(Transformer):
 
-    def __init__(self, score_func, percentile):
+    """
+    Select features according to the top percentile scores
+    """
+
+    def __init__(self, score_func: callable = f_classification, percentile: float = 10.0, **kwargs):
         """
-        Inicializa o seletor de percentil.
+        Initialize the SelectPercentile instance
 
-        Parâmetros
+        Parameters
         ----------
-        score_func : função,
-            Função usada para calcular os valores F.
-        percentile : int,
-            Percentual de características a serem selecionadas
-                """
+            score_func: callable, default = f_classification
+                Function taking dataset and returning a pair of arrays (scores, p_values)
+            percentile: float, default=10.0
+                    Percentile of top features to select (0.0 < percentile <= 100.0)
+        """
 
+        super().__init__(**kwargs)
         self.score_func = score_func
         self.percentile = percentile
         self.F = None
         self.p = None
+        if not (0.0 < percentile <= 100.0):
+            raise ValueError("Percentile must be between 0.0 and 100.0.")
 
 
-    def _fit(self, X, y):
-
+    def _fit(self, dataset: Dataset) -> 'SelectPercentile':
         """
-        Estima os valores F e p para cada característica.
+        Compute the F scores and p-values for each feature
 
-        Retorna
+        Parameters
+        ----------
+        dataset: Dataset
+            A labeled dataset
+
+        Returns
         -------
-        self
-            retorna a instância do objeto
+        self: object
+            Returns self
         """
 
-        self.F, self.p = self.score_func(X, y)
+        self.F, self.p = self.score_func(dataset)
         return self
 
-    def _transform(self, X):
-
+    def _transform(self, dataset: Dataset) -> Dataset:
         """
-        Seleciona as características com os maiores valores F até o percentil especificado.
+        Transform the dataset by selecting features in the specified percentile.
 
-        Retorna
+        Parameters
+        ----------
+        dataset: Dataset
+            A labeled dataset.
+
+        Returns
         -------
-        X_transformed
-            conjunto de dados transformado com as melhores características
+        dataset: Dataset
+            A labeled dataset with the top percentile scoring features.
         """
 
-        num_features_to_select = int(np.ceil(self.percentile / 100 * X.shape[1]))
-        top_features = np.argsort(self.F)[-num_features_to_select:]
-
-        return X[:, top_features]
+        num_features = len(dataset.features)
+        k = int(np.ceil(self.percentile / 100.0 * num_features))  # Calcula número de características a manter
+        idxs = np.argsort(self.F)[-k:]  # Obtém os índices das k melhores características
+        features = np.array(dataset.features)[idxs]  # Nomes das características selecionadas
+        return Dataset(X=dataset.X[:, idxs], y=dataset.y, features=list(features), label=dataset.label)
