@@ -18,7 +18,7 @@ class SelectPercentile(Transformer):
         ----------
             score_func: callable, default = f_classification
                 Function taking dataset and returning a pair of arrays (scores, p_values)
-            percentile: float, default=10.0
+            percentile: float, default = 10.0
                     Percentile of top features to select (0.0 < percentile <= 100.0)
         """
 
