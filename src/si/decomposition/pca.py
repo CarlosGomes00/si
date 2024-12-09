@@ -4,7 +4,7 @@ from si.base.transformer import Transformer
 
 class PCA(Transformer):
 
-    def __init__(self, n_components : int, **kwargs):
+    def __init__(self, n_components: int, **kwargs):
         """
         Parameters
         ----------
@@ -45,7 +45,7 @@ class PCA(Transformer):
 
         if self.n_components > dataset.X.shape[1]:
             raise ValueError(
-                f"n_components ({self.n_components}) cant be greater than the number of features ({dataset.X.shape[1]})."
+                f"n_components ({self.n_components}) cant be greater than the number of features ({dataset.X.shape[1]})"
             )
 
         self.mean = np.mean(dataset.X, axis=0)
@@ -90,4 +90,3 @@ class PCA(Transformer):
 
         return x_reduced
 
-#TODO Perceber o que está errado e ver Notebook
