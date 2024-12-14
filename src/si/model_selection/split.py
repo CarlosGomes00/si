@@ -85,4 +85,3 @@ def stratified_train_test_split(dataset : Dataset, test_size : float = 0.2, rand
 
     return train_dataset, test_dataset
 
-#TODO FAZER TESTES

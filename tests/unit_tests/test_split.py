@@ -1,11 +1,12 @@
 from unittest import TestCase
 
 from datasets import DATASETS_PATH
-
-import os
 from si.io.csv_file import read_csv
-
 from si.model_selection.split import train_test_split
+from si.model_selection.split import stratified_train_test_split
+
+import numpy as np
+import os
 
 class TestSplits(TestCase):
 
@@ -20,3 +21,32 @@ class TestSplits(TestCase):
         test_samples_size = int(self.dataset.shape()[0] * 0.2)
         self.assertEqual(test.shape()[0], test_samples_size)
         self.assertEqual(train.shape()[0], self.dataset.shape()[0] - test_samples_size)
+
+    def test_stratified_split_output_type(self):
+
+        train, test = stratified_train_test_split(self.dataset, test_size=0.2, random_state=42)
+        self.assertIsInstance(train, type(self.dataset), "Train dataset isn't a Dataset type")
+        self.assertIsInstance(test, type(self.dataset), "Test dataset isn't a Dataset type")
+
+    def test_stratified_split_proportion(self):
+
+        test_size = 0.2
+        train, test = stratified_train_test_split(self.dataset, test_size=test_size, random_state=42)
+
+        total_samples = len(self.dataset.y)
+        expected_test_size = int(total_samples * test_size)
+
+        self.assertEqual(len(test.y), expected_test_size, "The size of the test set isn't correct")
+        self.assertEqual(len(train.y), total_samples - expected_test_size,
+                         "The size of the train set isn't correct")
+
+    def test_stratified_split_random_state(self):
+
+        train1, test1 = stratified_train_test_split(self.dataset, test_size=0.2, random_state=42)
+        train2, test2 = stratified_train_test_split(self.dataset, test_size=0.2, random_state=42)
+
+        np.testing.assert_array_equal(train1.X, train2.X, "Training data isn't consistent")
+        np.testing.assert_array_equal(test1.X, test2.X, "Test data isn't consistent")
+
+
+        #TODO Adicionar mais um para verificar se continua balanceado
