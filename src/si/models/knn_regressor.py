@@ -1,6 +1,7 @@
 import numpy as np
 from si.base.model import Model
 from si.data.dataset import Dataset
+from si.metrics.rmse import rmse
 from typing import Callable
 
 
@@ -34,10 +35,55 @@ class KNNRegressor(Model):
             The dataset to fit the model to
 
         Returns
-        -------
+        ----------
         self: KNNClassifier
             The fitted model
         """
 
         self.dataset = dataset
         return self
+
+    def _predict(self, dataset: Dataset) -> np.array:
+        """
+        Estimates the values based on the k nearest neighbours
+
+        Parameters
+        ----------
+        dataset: Dataset
+            The dataset
+
+        Returns
+        ----------
+        predictions: np.array
+            Array with the predictions
+        """
+
+        predictions = np.zeros(dataset.X.shape[0])
+
+        for i in range(dataset.X.shape[0]):
+            distances = np.array([self.distance(dataset.X[i], x_train) for x_train in self.dataset.X])
+
+            k_indices = np.argsort(distances)[:self.k]
+            k_nearest_values = self.dataset.y[k_indices]
+
+            predictions[i] = np.mean(k_nearest_values)
+
+        return predictions
+
+    def _score(self, dataset: Dataset) -> 'rmse':
+
+        """
+        It calculates the error between the estimated and actual values
+
+        Parameters
+        ----------
+        dataset: Dataset
+            The dataset
+
+        Returns
+        ----------
+        rmse: float
+            Value corresponding to the error between y_true and y_pred
+        """
+
+        return rmse(dataset.y, self._predict(dataset))

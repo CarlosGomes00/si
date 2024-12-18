@@ -14,7 +14,8 @@ def rmse(y_true: np.array, y_pred: np.array) -> float:
 
     Returns
     -------
-        rmse : float corresponding the error between y_true and y_pred
+    rmse : float
+        value corresponding to the error between y_true and y_pred
     """
     y_true = np.asarray(y_true)
     y_pred = np.asarray(y_pred)
