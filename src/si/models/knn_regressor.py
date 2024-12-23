@@ -7,7 +7,7 @@ from typing import Callable
 
 class KNNRegressor(Model):
 
-    def __init__self(self, k: int, distance: Callable, **kwargs):
+    def __init__(self, k: int, distance: Callable, **kwargs):
 
         """
         Initialize the KNN Regressor
