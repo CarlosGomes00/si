@@ -7,7 +7,7 @@ from si.metrics.mse import mse
 
 class LassoRegression(Model):
 
-    def __init__(self, l1_penalty: float = 0.1, max_iter: int = 1000, scale: bool = True, patience : int = 5, **kwargs):
+    def __init__(self, l1_penalty: float = 0.1, max_iter: int = 1000, scale: bool = True, patience: int = 5, **kwargs):
         """
         Initialize the Lasso Regression model
 
@@ -52,12 +52,11 @@ class LassoRegression(Model):
         """
 
         if self.scale:
-            self.mean = dataset.X.mean(axis=0)
-            self.std = dataset.X.std(axis=0)
+            self.mean = np.nanmean(dataset.X, axis=0)
+            self.std = np.nanstd(dataset.X, axis=0)
             X_scaled = (dataset.X - self.mean) / self.std
         else:
             X_scaled = dataset.X
-
 
         m, n = dataset.shape()
         self.theta = np.zeros(n)
@@ -68,10 +67,10 @@ class LassoRegression(Model):
 
         while i < self.max_iter and early_stopping < self.patience:
 
-            y_pred = np.dot(X_scaled, self.theta) + self.theta_zero
+            predictions = np.dot(X_scaled, self.theta) + self.theta_zero
 
             for j in range(n):
-                residual = np.dot(X_scaled[:, j], dataset.y - (y_pred - self.theta[j] * X_scaled[:, j]))
+                residual = np.dot(X_scaled[:, j], dataset.y - (predictions - self.theta[j] * X_scaled[:, j]))
 
                 if residual < -self.l1_penalty:
                     self.theta[j] = (residual + self.l1_penalty) / np.sum(X_scaled[:, j] ** 2)
@@ -82,8 +81,8 @@ class LassoRegression(Model):
 
             self.theta_zero = np.mean(dataset.y - np.dot(X_scaled, self.theta))
 
-            y_pred = np.dot(X_scaled, self.theta) + self.theta_zero
-            cost = np.mean((dataset.y - y_pred) ** 2) + self.l1_penalty * np.sum(np.abs(self.theta))
+            predictions = np.dot(X_scaled, self.theta) + self.theta_zero
+            cost = np.mean((dataset.y - predictions) ** 2) + self.l1_penalty * np.sum(np.abs(self.theta))
             self.cost_history.append(cost)
 
             if i > 0 and self.cost_history[i] > self.cost_history[i - 1]:
@@ -129,7 +128,7 @@ class LassoRegression(Model):
         ----------
         dataset: Dataset
             The dataset to calculate the MSE score
-        y_pred: np.ndarray
+        predictions: np.ndarray
             The predicted values for the target variable
         Returns
         -------
@@ -139,4 +138,4 @@ class LassoRegression(Model):
 
         return mse(dataset.y, predictions)
 
-#TODO Perceber porque não está a passar no ultimo teste
+
