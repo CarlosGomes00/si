@@ -36,7 +36,16 @@ class RandomForestClassifier(Model):
         self.seed = seed
         self.trees = []
 
-    def _fit(self, dataset: Dataset):
+        if n_estimators <= 0:
+            raise ValueError("The number of estimators must be greater than 0")
+        if max_features <= 0:
+            raise ValueError("The maximum number of features must be greater than 0")
+        if min_samples_split <= 1:
+            raise ValueError("The minimum number of samples to split must be greater than 1")
+        if max_depth is not None and max_depth <= 0:
+            raise ValueError("The maximum depth must be greater than 0 or None")
+
+    def _fit(self, dataset: Dataset, seed= None):
 
         """
         Fit the RandomForestClassifier model to the dataset
@@ -45,6 +54,8 @@ class RandomForestClassifier(Model):
         ----------
         dataset : Dataset
             Dataset object containing the training data
+        seed : int
+            Random seed for reproducibility
         """
 
         n_samples, n_features = dataset.X.shape
@@ -79,6 +90,21 @@ class RandomForestClassifier(Model):
         return self
 
     def _predict(self, dataset: Dataset) -> np.ndarray:
+
+        """
+        Predicts the target values for the given dataset using the fitted Random Forest model.
+
+        Parameters
+        ----------
+        dataset : Dataset
+            The dataset object containing the feature matrix (X) for which predictions are to be made.
+
+        Returns
+        -------
+        final_predictions : np.ndarray
+            An array of predicted target values for each sample in the dataset.
+        """
+
         res_predictions = []
 
         unique_classes, y_encoded = np.unique(dataset.y, return_inverse=True)
@@ -103,9 +129,26 @@ class RandomForestClassifier(Model):
         return np.array(final_predictions)
 
     def _score(self, dataset: Dataset, predictions: np.ndarray):
-        predictions = self.predict(dataset)
+        """
+        Calculates the accuracy of the model
+
+        Parameters
+        ----------
+        dataset: Dataset
+            Dataset containing the validation data
+
+        Returns
+        -------
+        accuracy: float
+            Accuracy of the model
+
+        """
+
+        predictions = self._predict(dataset)
+        if len(predictions) != len(dataset.y):
+            raise ValueError("Predictions size doesn't match")
+
         accuracy = np.mean(predictions == dataset.y)
 
         return accuracy
 
-#TODO COMPLETAR E CORRIGIR (EX.9)
