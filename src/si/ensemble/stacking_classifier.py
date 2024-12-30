@@ -46,6 +46,8 @@ class StackingClassifier(Model):
 
         self.final_model._fit(stacked_dataset)
 
+        self.has_fitted = True
+
         return self
 
 
@@ -71,6 +73,8 @@ class StackingClassifier(Model):
         stacked_dataset = Dataset(X=predictions, y=None)
 
         final_predictions = self.final_model._predict(stacked_dataset)
+
+        self.has_predicted = True
 
         return final_predictions
 
