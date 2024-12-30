@@ -1,5 +1,5 @@
 import unittest
-import numpy as np
+
 from si.decomposition.pca import PCA
 from si.io.csv_file import read_csv
 
