@@ -140,4 +140,86 @@ class DenseLayer(Layer):
         tuple
             The shape of the output of the layer.
         """
-        return (self.n_units,) 
+        return (self.n_units,)
+
+
+class Dropout(Layer):
+    def __init__(self, probability: float):
+        """
+        Initializes the Dropout layer
+
+        Parameters
+        ----------
+        probability : float
+            The probability of dropping a unit
+        """
+        self.probability = probability
+        self.mask = None
+        self.input = None
+        self.output = None
+
+    def forward_propagation(self, input: np.ndarray, training: bool) -> np.ndarray:
+        """
+        Performs the forward pass through the Dropout layer
+
+        Parameters
+        ----------
+        input : np.ndarray
+            The input data to the layer
+        training : bool
+            Flag indicating whether the model is in training mode
+
+        Returns
+        -------
+        output : np.ndarray
+            The output data after applying dropout (if training) or unchanged input (if inference)
+        """
+        if training:
+            self.mask = np.random.binomial(1, 1 - self.probability, size=input.shape)
+
+            output = input * self.mask
+
+            return output
+        else:
+            return input
+
+    def backward_propagation(self, output_error: np.ndarray) -> np.ndarray:
+        """
+        Performs the backward pass through the Dropout layer
+
+        Parameters
+        ----------
+        output_error : np.ndarray
+            The gradient of the loss with respect to the output of the Dropout layer
+
+        Returns
+        -------
+        np.ndarray
+            The gradient of the loss with respect to the input of the Dropout layer
+        """
+        output_error = output_error * self.mask
+
+        return output_error
+
+    def output_shape(self) -> tuple:
+        """
+        Computes the output shape of the Dropout layer
+
+        Returns
+        -------
+        tuple
+            The shape of the input, which remains unchanged after applying dropout
+        """
+
+        return self.input.shape
+
+    def parameters(self) -> int:
+        """
+        Returns the number of trainable parameters in the Dropout layer
+
+        Returns
+        -------
+        int
+            The number of trainable parameters
+        """
+        return 0
