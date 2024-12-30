@@ -177,3 +177,82 @@ class ReLUActivation(ActivationLayer):
             The derivative of the activation function.
         """
         return np.where(input >= 0, 1, 0)
+
+class TanhActivation(ActivationLayer):
+    """
+    Tanh activation function
+    """
+    def activation_function(self, input: np.ndarray):
+        """
+        Compute the forward pass using the tanh activation function
+
+        Parameters
+        ----------
+        input: numpy.ndarray
+            The input to the layer
+
+        Returns
+        -------
+        numpy.ndarray
+            The output of the layer
+        """
+        self.input = input
+        return np.tanh(input)
+
+    def derivative(self, dout: np.ndarray):
+        """
+        Compute the backward pass of the tanh activation function
+
+        Parameters
+        ----------
+        dout: numpy.ndarray
+            Gradient of the loss with respect to the output of this layer
+
+        Returns
+        -------
+        numpy.ndarray
+            Gradient of the loss with respect to the input of this layer
+        """
+        return dout * (1 - np.tanh(self.input) ** 2)
+
+class SoftmaxActivation(ActivationLayer):
+    """
+    Softmax activation function
+    """
+    def activation_function(self, x: np.ndarray):
+        """
+        Compute the forward pass using the softmax activation function
+
+        Parameters
+        ----------
+        x: numpy.ndarray
+            The input to the layer
+
+        Returns
+        -------
+        numpy.ndarray
+            The output of the layer
+        """
+        self.input = x
+        exp_x = np.exp(x - np.max(x, axis=-1, keepdims=True))
+        self.output = exp_x / np.sum(exp_x, axis=-1, keepdims=True)
+        return self.output
+
+    def derivative(self, dout: np.ndarray):
+        """
+        Compute the backward pass (derivative) of the softmax activation function
+
+        Parameters
+        ----------
+        dout: numpy.ndarray
+            Gradient of the loss with respect to the output of this layer
+
+        Returns
+        -------
+        numpy.ndarray
+            Gradient of the loss with respect to the input of this layer
+        """
+
+        s = self.output
+        jacobian = np.diagflat(s) - np.dot(s[:, np.newaxis], s[np.newaxis, :])
+        return np.dot(dout, jacobian)
