@@ -127,29 +127,24 @@ class Dataset:
         return pd.DataFrame.from_dict(data, orient="index", columns=self.features)
 
 
-    def dropna(self) -> 'pd.DataFrame':
+    def dropna(self):
 
         """
-        Returns a modified Dataset object with NaN values dropped
+        Identifies all rows in the matrix X that contain at least one NaN value and drops them
+
+        Parameters
+        ----------
+        The method does not take any arguments
 
         Returns
         -------
-        pandas.DataFrame
+        The Dataset object itself, with updated data
         """
+        rows_na = np.isnan(self.X).any(axis=1)
+        self.X = self.X[~rows_na]
+        self.y = self.y[~rows_na]
 
-        new_X, new_y = self.X.to_numpy(), self.y.to_numpy()
-
-        mask = ~np.any(np.isnan(new_X), axis = 1) & ~np.any(np.isnan(new_y), axis = 1)
-
-        new_X = new_X[mask]
-        new_y = new_y[mask]
-
-        new_df_X = pd.DataFrame(new_X, columns = self.features)
-        new_df_y = pd.DataFrame(new_y, columns = self.labels)
-
-        new_df = pd.concat([new_df_X, new_df_y], axis=1)
-
-        return new_df
+        return self
 
     def fillna(self, value) -> 'Modified Dataset object':
         """

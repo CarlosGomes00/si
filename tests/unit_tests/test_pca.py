@@ -17,7 +17,7 @@ class TestPCA(unittest.TestCase):
         self.assertIsNone(pca.explained_variance)
 
     def test_fit_raises_error(self):
-        pca = PCA(n_components=3)
+        pca = PCA(n_components=6)
         with self.assertRaises(ValueError):
             pca._fit(self.dataset)
 
